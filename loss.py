@@ -122,4 +122,18 @@ def box_iou(b1, b2):
     return iou
 
 
+def kp_loss(args, n_classes):
+    # xy_loss: bce, (N,)
+    # conf_loss: binary cls, (N,)
+    # cls_loss: multi cls, use conf vector, (N,)
+    # return: stacked [total_loss, xy_loss, conf_loss, cls_loss], (N,4)
+    n_layers = len(args) // 2
+    y_preds = args[:n_layers]     # [B,H,W,c,2+1], level0->level2
+    y_trues = args[n_layers:]
+    tmp = K.sum(y_preds[0], axis=[1,2,3])
+    return K.stack([tmp, tmp, tmp, tmp], axis=1)
+
+
+
+
 

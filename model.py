@@ -1,6 +1,5 @@
 from keras.layers import Input, Conv2D, UpSampling2D, concatenate, Lambda
 from keras.models import Model
-import keras.backend as K
 from backbone import darknet, Conv_BN
 from loss import yolo_loss
 from dataLoader import get_anchors

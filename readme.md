@@ -32,7 +32,7 @@
     [w, h]
 
 
-## offset(raw output)  --- scale-wise abs --- normed
+## offset(raw output) [t]  --- scale-wise abs [b] --- normed [normed_b]
     bx = sigmoid(tx) + cx
     by = sigmoid(tx) + cy
     cx, cy是某尺度特征图的grid的坐标，bx, by是相对于当前尺度的中心点绝对偏移量，因此normed bx、by也是相对于相应尺度的特征图
@@ -65,6 +65,13 @@
 
     cls_loss: bce
     针对正样本
+
+
+## kp model
+    做关键点定位的task，把头的bnd box改成xy，back不用动
+    考虑一个格子里面可能有多个点，
+    没有宽高就不需要anchors，
+    所以最后head的输出维度是[H,W,n_cls,2+1]
 
 
 
