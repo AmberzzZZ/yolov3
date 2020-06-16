@@ -68,10 +68,11 @@
 
 
 ## kp model
-    做关键点定位的task，把头的bnd box改成xy，back不用动
+    做关键点定位的task, back不用动, 把头的bnding box改成xy
     考虑一个格子里面可能有多个点，
-    没有宽高就不需要anchors，
-    所以最后head的输出维度是[H,W,n_cls,2+1]
+    没有宽高不需要anchors，
+    所以最后head的输出维度是[H,W,1+n_cls*(2+1)], 
+    1 for conf dim, 2 for xy offset, 1 for cls posibility
 
 
 
