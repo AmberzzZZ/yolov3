@@ -68,11 +68,33 @@
 
 
 ## kp model
-    做关键点定位的task, back不用动, 把头的bnding box改成xy
-    考虑一个格子里面可能有多个点，
-    没有宽高不需要anchors，
-    所以最后head的输出维度是[H,W,1+n_cls*(2+1)], 
-    1 for conf dim, 2 for xy offset, 1 for cls posibility
+    做关键点定位的task, back不动, 两个头，一个做xy regression，一个做分类，
+    一个GT grid里面可能落多个点，选centerness最大的点作为标签，
+    GT label不用点，用类似高斯核的东西，引入centerness替代conf，弱化class imbalance
+    没有宽高不需要anchors，没有anchor channel
+    reg head输出维度[H,W,2]
+    cls head输出维度[H,W,n_cls+1], 1 for centerness
+    shared head / separated head: 
+        yolo是shared head，xywhclsconf一起出的
+        retinaNet是separated head，fpn的特征出来两个head有独立的4个conv+head
+
+    centerness:
+    from FCOS, [min(l,r)*min(u,b)] / [max(l,r)*max(u,b)], 可以加个sqrt "to slow down the decay"
+    from PolarMask, min(d0,d1,..) / max(d0,d1,...), 
+    这两个都是预测点相对contour的距离来计算centerness，
+    我们只预测关键点的话，可以直接回归一个高斯核的conf
+
+    loss:
+    我们要回归的xy，cls，centerness都是[0,1]之间的值
+    base loss可以用bce，
+    further more：l2、wce、focal_loss...
+
+
+
+
+
+
+
 
 
 

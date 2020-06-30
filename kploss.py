@@ -4,11 +4,11 @@ import numpy as np
 
 
 def kp_loss(args, n_classes):
-    # y_true: (N,H,W,1+cls*2), level0->level2, 2 for abs normed xy
+    # y_true: (N,H,W,2+cls+1), level0->level2, 2 for abs normed xy, cls for cls posibility, 1 for centerness
     # xy_loss: bce, (N,)
-    # conf_loss: binary cls, (N,)
-    # cls_loss: multi cls, use conf vector, (N,)
-    # return: list of stacked [total_loss, xy_loss, conf_loss, cls_loss], (N,4), for each level
+    # centerness_loss: bce, (N,)
+    # cls_loss: bce, multi cls, (N,)
+    # return: list of stacked [total_loss, xy_loss, centerness_loss, cls_loss], (N,4), for each level
     n_layers = len(args) // 2
     y_preds, y_trues = args[:n_layers], args[n_layers:]
     y_trues = norm2offset(y_trues, y_preds, n_classes)

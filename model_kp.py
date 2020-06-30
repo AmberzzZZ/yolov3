@@ -1,4 +1,4 @@
-from keras.layers import Input, UpSampling2D, concatenate, Lambda, Reshape
+from keras.layers import Input, UpSampling2D, concatenate, Lambda
 from keras.models import Model
 from keras.optimizers import Adam
 import keras.backend as K
@@ -39,11 +39,11 @@ def kp_model(n_classes=24, input_shape=(416,416,3), lr=3e-4, decay=5e-6,
 
     y_pred = model_body(inpt)
 
-    # yt input  list of [N,h,w,1+cls*(2+1)]
+    # yt input  list of [N,h,w,2+cls+1)]
     h, w = input_shape[:2]
     y_true = [Input(shape=(h//{0:32,1:16,2:8}[i],
                            w//{0:32,1:16,2:8}[i],
-                           1+n_classes*(2+1))) for i in range(3)]
+                           2+n_classes+1)) for i in range(3)]
 
     # loss layer  list of [N,4]
     model_loss = Lambda(kp_loss, name='kp_loss', arguments={'n_classes': n_classes})([*y_pred, *y_true])
