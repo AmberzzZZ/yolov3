@@ -46,7 +46,7 @@
 
 
 ## loss
-    box_loss_scale: 目标越大权重越小
+    box_loss_scale: 目标越大权重越小，最终的loss是三个尺度加在一起的
 
     loss是在raw offset层面计算的，通过bbox函数计算的normed boxes是为了计算IOU，进而计算ignore_mask
 

@@ -1,12 +1,30 @@
 from keras.layers import Input, Conv2D, UpSampling2D, concatenate, Lambda
 from keras.models import Model
+from keras.optimizers import Adam
+import keras.backend as K
 from backbone import darknet, Conv_BN
 from loss import yolo_loss
 from dataLoader import get_anchors
 import os
 
 
-def yolo_model(anchors, n_classes=20, input_shape=(416,416,3),
+####### custom metrics #######
+def xy_loss(y_true, y_pred):
+    return K.mean(y_pred[:,1])
+
+def wh_loss(y_true, y_pred):
+    return K.mean(y_pred[:,2])
+
+def conf_loss(y_true, y_pred):
+    return K.mean(y_pred[:,3])
+
+def cls_loss(y_true, y_pred):
+    return K.mean(y_pred[:,4])
+
+metric_lst = [xy_loss, wh_loss, conf_loss, cls_loss]
+
+
+def yolo_model(anchors, n_classes=20, input_shape=(416,416,3), lr=3e-4, decay=5e-6,
                load_pretrained=False, freeze_body=2, weights_path=''):
     # image input [h,w,c]
     inpt = Input(input_shape)
@@ -35,7 +53,7 @@ def yolo_model(anchors, n_classes=20, input_shape=(416,416,3),
     # loss layer
     model_loss = Lambda(yolo_loss, output_shape=(1,), name='yolo_loss',
                         arguments={'anchors': anchors, 'n_classes': n_classes,
-                        'ignore_thresh': 0.5, 'print_loss': False})([*y_pred, *y_true])
+                        'ignore_thresh': 0.5, 'print_loss': False})([*y_pred, *y_true])     # [N,5]
 
     model = Model([inpt, *y_true], model_loss)
 

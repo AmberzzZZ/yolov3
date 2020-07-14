@@ -55,17 +55,18 @@ def yolo_loss(args, anchors, n_classes, ignore_thresh=0.5, print_loss=False):
         # cls_loss: bce
         cls_loss = conf_gt * K.binary_crossentropy(cls_gt, feats[...,5:], from_logits=True)
 
-        xy_loss = K.sum(xy_loss) / mf
-        wh_loss = K.sum(wh_loss) / mf
-        conf_loss = K.sum(conf_loss) / mf
-        cls_loss = K.sum(cls_loss) / mf
+        xy_loss = K.sum(xy_loss, axis=[1,2,3,4])
+        wh_loss = K.sum(wh_loss, axis=[1,2,3,4])
+        conf_loss = K.sum(conf_loss, axis=[1,2,3,4])
+        cls_loss = K.sum(cls_loss, axis=[1,2,3,4])
         loss += xy_loss + wh_loss + conf_loss + cls_loss
 
         if print_loss:
             # loss & num of negtives
             loss = tf.Print(loss, [loss, xy_loss, wh_loss, conf_loss, cls_loss, K.sum(ignore_mask)], message='loss: ')
 
-    return loss
+    return K.stack([loss, xy_loss, wh_loss, conf_loss, cls_loss], axis=1)
+    # return loss
 
 
 # for each level, offset outputs to normed outputs, logit outputs to posiblity outputs

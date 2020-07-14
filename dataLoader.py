@@ -6,7 +6,7 @@ import cv2
 
 # img: png
 # anno: normed xywh, cls
-def data_generator(img_dir, anno_dir, batch_size, target_size, anchors, n_classes, max_boxes=20):
+def dataGenerator(img_dir, anno_dir, batch_size, target_size, anchors, n_classes, max_boxes=20, aug=False):
     img_lst = os.listdir(img_dir)
     while 1:
         random.shuffle(img_lst)
@@ -24,7 +24,7 @@ def data_generator(img_dir, anno_dir, batch_size, target_size, anchors, n_classe
                         continue
                     x, y, w, h, classid = map(float, line.strip().split(" "))
                     boxes[idx] = [x, y, w, h, classid]
-            img, boxes = augmentation(img, boxes, target_size, aug=False)    # [rescale, shift, rotate]->affine, noise
+            img, boxes = augmentation(img, boxes, target_size, aug=aug)    # [rescale, shift, rotate]->affine, noise
             img_batch.append(img)
             yt_batch.append(boxes)
 
@@ -118,10 +118,10 @@ if __name__ == '__main__':
     anchors = get_anchors("yolo_anchors.txt")
     n_classes = 2
 
-    dataGenerator =  data_generator(img_dir, anno_dir, batch_size, target_size,
+    data_generator =  dataGenerator(img_dir, anno_dir, batch_size, target_size,
                                     anchors, n_classes, max_boxes=20)
 
-    for idx, data_batch in enumerate(dataGenerator):
+    for idx, data_batch in enumerate(data_generator):
         input_batch = data_batch[0]
         img_batch, yt_batch = input_batch[0], input_batch[1:]
         print("img: ", img_batch.shape)
