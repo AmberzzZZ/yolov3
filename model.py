@@ -1,6 +1,5 @@
 from keras.layers import Input, Conv2D, UpSampling2D, concatenate, Lambda
 from keras.models import Model
-from keras.optimizers import Adam
 import keras.backend as K
 from backbone import darknet, Conv_BN
 from loss import yolo_loss
@@ -24,14 +23,15 @@ def cls_loss(y_true, y_pred):
 metric_lst = [xy_loss, wh_loss, conf_loss, cls_loss]
 
 
-def yolo_model(anchors, n_classes=20, input_shape=(416,416,3), lr=3e-4, decay=5e-6,
+def yolo_model(anchors, n_classes=20, input_shape=(416,416,3), initial_filters=32,
+               lr=3e-4, decay=5e-6,
                load_pretrained=False, freeze_body=2, weights_path=''):
     # image input [h,w,c]
     inpt = Input(input_shape)
 
     # yolo body: darknet53 + fpn
     n_anchors = len(anchors)
-    model_body = yolo_body(input_shape, n_anchors, n_classes)
+    model_body = yolo_body(input_shape, n_anchors, n_classes, initial_filters)
     if load_pretrained and os.path.exists(weights_path):
         model_body.load_weights(weights_path, by_name=True, skip_mismatch=True)
         if freeze_body in [1,2]:
@@ -60,8 +60,8 @@ def yolo_model(anchors, n_classes=20, input_shape=(416,416,3), lr=3e-4, decay=5e
     return model
 
 
-def yolo_body(input_shape, n_anchors, n_classes):
-    darknet_back = darknet(input_shape=input_shape, multi_out=True)
+def yolo_body(input_shape, n_anchors, n_classes, initial_filters=32):
+    darknet_back = darknet(input_shape=input_shape, multi_out=True, initial_filters=initial_filters)
     C2, C1, C0 = darknet_back.outputs[-3:]
     U0, P0 = fpn_node(C0, 512, 256, n_anchors*(4+1+n_classes))
     U0 = UpSampling2D(size=2)(U0)
@@ -93,8 +93,8 @@ def fpn_node(x, n_filters, up_filters, out_filters):
 if __name__ == '__main__':
 
     anchors = get_anchors('yolo_anchors.txt')
-    model = yolo_model(anchors, input_shape=(416,416,3))
-    # model.summary()
+    model = yolo_model(anchors, input_shape=(416,416,3), initial_filters=8)
+    model.summary()
 
     # model = yolo_body((416,416,3), 9, 20)
     # print(len(model.layers))

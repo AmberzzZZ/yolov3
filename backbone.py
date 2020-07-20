@@ -2,20 +2,21 @@ from keras.layers import Input, Conv2D, BatchNormalization, LeakyReLU, add, Glob
 from keras.models import Model
 
 
-def darknet(input_tensor=None, input_shape=(416,416,3), n_classes=1000, include_top=False, multi_out=False):
+def darknet(input_tensor=None, input_shape=(416,416,3), n_classes=1000, initial_filters=32,
+            include_top=False, multi_out=False):
     if input_tensor is None:
         inpt = Input(input_shape)
     else:
         inpt = input_tensor
 
     # stem
-    x = Conv_BN(inpt, 32, 3, strides=1, activation='leaky')
-    x = Conv_BN(x, 64, 3, strides=2, activation='leaky')
+    x = Conv_BN(inpt, initial_filters, 3, strides=1, activation='leaky')
+    x = Conv_BN(x, initial_filters*2, 3, strides=2, activation='leaky')
 
     # back
     feats = []
     n_blocks = [1,2,8,8,4]
-    n_filters = [64, 128, 256, 512, 1024]
+    n_filters = [initial_filters*2**i for i in range(6)]
     for level in range(len(n_blocks)):
         # darknet res block
         for i in range(n_blocks[level]):
