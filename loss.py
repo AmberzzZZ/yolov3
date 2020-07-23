@@ -3,15 +3,17 @@ import tensorflow as tf
 import numpy as np
 
 
-def yolo_loss(args, anchors, n_classes, ignore_thresh=0.5, print_loss=False):
+def yolo_loss(args, anchors, n_classes, ignore_thresh=0.5):
     n_layers = len(args) // 2
-    y_preds = args[:n_layers]     # [B,H,W,3,4+1+c], level0->level2
-    y_trues = args[n_layers:]
+    y_preds = args[:n_layers]     # [B,H,W,3*(4+1+c)], level0->level2
+    y_trues = args[n_layers:]     # [B,H,W,3,4+1+c],   level0->level2
+
     anchor_mask = [[6,7,8], [3,4,5], [0,1,2]]     # big object---> P0
     input_shape = [y_trues[0]._keras_shape[i] * 32 for i in [1,2]]
     grid_shapes = [y_trues[i]._keras_shape[1:3] for i in range(3)]
 
     loss = 0.
+    xy_loss_, wh_loss_, conf_loss_, cls_loss_, = 0., 0., 0., 0.
     m = K.shape(y_preds[0])[0]     # batch size
     mf = K.cast(m, K.dtype(y_preds[0]))         # batch size to float
     for i in range(n_layers):
@@ -55,18 +57,15 @@ def yolo_loss(args, anchors, n_classes, ignore_thresh=0.5, print_loss=False):
         # cls_loss: bce
         cls_loss = conf_gt * K.binary_crossentropy(cls_gt, feats[...,5:], from_logits=True)
 
-        xy_loss = K.sum(xy_loss, axis=[1,2,3,4])
-        wh_loss = K.sum(wh_loss, axis=[1,2,3,4])
-        conf_loss = K.sum(conf_loss, axis=[1,2,3,4])
-        cls_loss = K.sum(cls_loss, axis=[1,2,3,4])
-        loss += xy_loss + wh_loss + conf_loss + cls_loss
+        xy_loss_ += K.sum(xy_loss) / mf
+        wh_loss_ += K.sum(wh_loss) / mf
+        conf_loss_ += K.sum(conf_loss) / mf
+        cls_loss_ += K.sum(cls_loss) / mf
 
-        if print_loss:
-            # loss & num of negtives
-            loss = tf.Print(loss, [loss, xy_loss, wh_loss, conf_loss, cls_loss, K.sum(ignore_mask)], message='loss: ')
+    loss = xy_loss_ + wh_loss_ + conf_loss_ + cls_loss_
 
-    return K.stack([loss, xy_loss, wh_loss, conf_loss, cls_loss], axis=1)
     # return loss
+    return tf.stack([loss, xy_loss_, wh_loss_, conf_loss_, cls_loss_], axis=0)
 
 
 # for each level, offset outputs to normed outputs, logit outputs to posiblity outputs

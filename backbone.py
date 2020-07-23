@@ -16,7 +16,8 @@ def darknet(input_tensor=None, input_shape=(416,416,3), n_classes=1000, initial_
     # back
     feats = []
     n_blocks = [1,2,8,8,4]
-    n_filters = [initial_filters*2**i for i in range(6)]
+    n_filters = [initial_filters*(2**i) for i in range(1,6)]
+
     for level in range(len(n_blocks)):
         # darknet res block
         for i in range(n_blocks[level]):
@@ -61,6 +62,6 @@ def Conv_BN(x, n_filters, kernel_size, strides, activation=None):
 
 if __name__ == '__main__':
 
-    model = darknet(input_tensor=None, input_shape=(416,416,3), n_classes=1000, include_top=False)
+    model = darknet(input_tensor=None, input_shape=(416,416,3), n_classes=20, initial_filters=32)
     print(len(model.layers))
     model.summary()

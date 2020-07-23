@@ -4,6 +4,10 @@
     exclude top: 180 layers
     yolo源代码185: 因为它五次下采样多了五层zeropadding
 
+    小数据集：initial_filters可以改小
+    initial_filters=8: Total params: 2,556,808
+    initial_filters=32: Total params: 40,638,496
+
 
 ## fpn
     total layers: 247, 和源代码差在那五层zeropadding
@@ -12,6 +16,8 @@
     up branch：1x1的conv降低到指定维度
     out branch：3x3的conv + 1x1的conv head
 
+    back+fpn: Total params: 61,650,535
+    
 
 ## yt input
     lst, 每个尺度特征图选一个best match anchor(iou最大的), [h,w,a,4+1+c], 
@@ -54,14 +60,15 @@
     针对正样本
     tx,ty用于回归bounding box中心点的位置，gt的中心点落在对应格子内，一定在[0,1]范围内，pred通过sigmoid激活函数限定在[0,1]之间
 
-    wh_loss: l2, based on anchor shape
+    wh_loss: l2 loss, based on anchor shape
     针对正样本
     tw,th用于回归bounding box相对于anchor box的尺度，比例无界但是永远大于0，所以pred通过exp函数限定在正数范围内
 
     conf_loss: bce
-    ignore_mask: pos, truth_thresh, ignore, ignore_thresh, neg
+    ignore_mask: 没有目标的格子中，如果格子预测出物体且预测目标与某gt box的IOU>ignore_thresh, 则视为忽略样本
+    通常这部分样本位于gt boxes附近，加入到有无目标的判断中容易混淆。
     对于正样本（即该格子有目标），计交叉熵。
-    对于负样本（即该格子没有目标），只有bbox与ground truth的IOU小于阈值ignore threshold（通常取为0.5），才计交叉熵。
+    对于负样本（即该格子没有目标，且预测目标与gt boxes的IOU均小于ignore_thresh），计交叉熵。
 
     cls_loss: bce
     针对正样本
@@ -88,6 +95,8 @@
     我们要回归的xy，cls，centerness都是[0,1]之间的值
     base loss可以用bce，
     further more：l2、wce、focal_loss...
+
+
 
 
 
