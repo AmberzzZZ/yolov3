@@ -53,7 +53,7 @@ def dark_res_block(x, n_filters):
 
 
 def Conv_BN(x, n_filters, kernel_size, strides, activation=None):
-    x = Conv2D(n_filters, kernel_size, strides=strides, padding='same')(x)
+    x = Conv2D(n_filters, kernel_size, strides=strides, padding='same', use_bias=False)(x)
     x = BatchNormalization()(x)
     if activation:
         x = LeakyReLU(alpha=0.1)(x)
