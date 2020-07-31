@@ -8,6 +8,12 @@
     initial_filters=8: Total params: 2,556,808
     initial_filters=32: Total params: 40,638,496
 
+    # weights convert
+    本文的网络结构和darknet.cfg基本一致，除了：
+    1. fpn中连conv57之后的两个分支conv59和conv60对调
+    2. fpn中连conv66之后的两个分支conv67和conv68对调
+    已经在yolo_ref.cfg中改过来了，除此以外，只需要修改三个[yolo]头的n_classes和[net]的长宽通道
+
 
 ## fpn
     total layers: 247, 和源代码差在那五层zeropadding

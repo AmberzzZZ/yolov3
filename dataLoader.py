@@ -15,6 +15,8 @@ def dataGenerator(img_dir, anno_dir, batch_size, target_size, anchors, n_classes
         for img in img_lst[:batch_size]:
             file_name = img.split('.jpg')[0]
             img = cv2.imread(os.path.join(img_dir, img), 0)
+            if np.max(img)>1:
+                img = img/255.
             boxes = np.zeros((max_boxes, 5))
             with open(os.path.join(anno_dir, file_name+'.txt'), 'r') as f:
                 for idx, line in enumerate(f.readlines()):
@@ -23,15 +25,17 @@ def dataGenerator(img_dir, anno_dir, batch_size, target_size, anchors, n_classes
                     if len(line) < 10:
                         continue
                     x, y, w, h, classid = map(float, line.strip().split(" "))
+                    if classid>=n_classes or x<0 or x>1 or y<0 or y>1 or w<0 or w>1 or h<0 or h>1:
+                        continue
                     boxes[idx] = [x, y, w, h, classid]
             img, boxes = augmentation(img, boxes, target_size, aug=aug)    # [rescale, shift, rotate]->affine, noise
+            img = np.expand_dims(img, axis=-1)
             img_batch.append(img)
             yt_batch.append(boxes)
 
         img_batch = np.array(img_batch)
         yt_batch = np.array(yt_batch)
         yt_batch_lst = normedPreprocess(yt_batch, target_size, anchors, n_classes)
-        print(len(yt_batch_lst))
         yield [img_batch, *yt_batch_lst], np.zeros((batch_size))
 
 

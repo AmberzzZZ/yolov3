@@ -62,6 +62,7 @@ def Conv_BN(x, n_filters, kernel_size, strides, activation=None):
 
 if __name__ == '__main__':
 
-    model = darknet(input_tensor=None, input_shape=(416,416,3), n_classes=20, initial_filters=32)
+    model = darknet(input_tensor=None, input_shape=(512,512,1), n_classes=20, initial_filters=32, multi_out=True)
     print(len(model.layers))
     model.summary()
+    print(model.outputs)
