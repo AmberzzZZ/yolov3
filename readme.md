@@ -80,6 +80,15 @@
     针对正样本
 
 
+    [new:]IOU loss
+    iou = inter_area / union_area
+    ciou = iou - p2/c2 - av, p2是两个box中心点的l2 distance, c2是两个box外接矩形对角线的l2 distance
+    
+
+
+    
+
+
 ## kp model
     做关键点定位的task, back不动, 两个头，一个做xy regression，一个做分类，
     一个GT grid里面可能落多个点，选centerness最大的点作为标签，

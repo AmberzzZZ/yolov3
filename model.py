@@ -84,11 +84,13 @@ def fpn_node(x, n_filters, up_filters, out_filters):
 if __name__ == '__main__':
 
     anchors = get_anchors('prep/yolo_anchors.txt')
-    # model = yolo_model(anchors, input_shape=(512,512,1), initial_filters=32, n_classes=3,
-    #                     load_pretrained=True, freeze_body=1, weights_path="convert/yolo.h5")
+    # train model
+    model = yolo_model(anchors, input_shape=(512,512,1), initial_filters=32, n_classes=3,
+                        load_pretrained=True, freeze_body=1, weights_path="convert/yolo.h5")
     # model.summary()
 
-    model = yolo_model(anchors, input_shape=(512,512,1), initial_filters=32, n_classes=3, eval_model=True)
+    # eval model
+    # model = yolo_model(anchors, input_shape=(512,512,1), initial_filters=32, n_classes=3, eval_model=True)
 
     # model = yolo_body((416,416,3), 9, 20)
     # print(len(model.layers))
